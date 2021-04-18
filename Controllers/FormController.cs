@@ -9,9 +9,8 @@ using System.Threading.Tasks;
 namespace DotnetMiniBe.Controllers
 {
     [ApiController]
-    [Route("api")]
-    public class FormController : ControllerBase
-    {
+    public class FormController : Controller {  
+
         private readonly ILogger<FormController> _logger;
 
         public FormController(ILogger<FormController> logger)
@@ -21,7 +20,7 @@ namespace DotnetMiniBe.Controllers
 
         [HttpGet]
         [Route("form")]
-        public ActionResult Index()
+        public ActionResult GetRawForm()
         {
             string form = "<html>" 
                 + "<head><title>Form demo</title></head>" 
@@ -38,19 +37,31 @@ namespace DotnetMiniBe.Controllers
             return Content(form, "text/html");
         }
 
+        [HttpGet]
+        [Route("form/view")]
+        public ActionResult GetFormView()
+        {
+            return View("FormTemplate");
+        }
+
         [HttpPost]
         [Route("form")]
         public string JsonStringBody()
         {
-            string resp;
+            var requestHeaders = Request.Headers;
+            var requestHeadersAsString = string.Join("\n", requestHeaders.Select(kv => kv.Key + " ===> " + kv.Value).ToArray());
+
+            string requestBody;
             using (var reader = new StreamReader(Request.Body))
             {
                 var body = reader.ReadToEndAsync();
                 Console.WriteLine(body.Result);
-                resp = body.Result;
+                requestBody = body.Result;
             }
 
-            return resp;
+            return 
+                $"Request headers:\n{ requestHeadersAsString }\n\n" +
+                $"Request body:\n{ requestBody }";
         }
     }
 }
